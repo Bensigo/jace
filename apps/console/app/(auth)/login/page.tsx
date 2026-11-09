@@ -6,7 +6,15 @@ import { AUTH_MAIN, AUTH_INK_BUTTON, AuthCard, JaceAvatar, BackToJace } from "..
 /** /login — the console's front door, in the landing's language (auth-v2):
  *  paper surface, ink card, mono voice, lemon press button. Same server
  *  action as the landing's sign-in seams. */
+export const dynamic = "force-dynamic";
 export default function LoginPage() {
+  if (process.env.LOCAL_OPERATOR_LOGIN === "1" && !process.env.VERCEL) {
+    return <main style={LIGHT_SURFACE} className={AUTH_MAIN}><AuthCard>
+      <h1 className="text-2xl font-bold">Local Console</h1>
+      <p>Run <code>pnpm local:open</code> from this checkout to open your local operator session.</p>
+      <p className="text-sm text-[var(--gray-09)]">No GitHub OAuth or hosted product account is required.</p>
+    </AuthCard></main>;
+  }
   return (
     <main style={LIGHT_SURFACE} className={AUTH_MAIN}>
       <AuthCard>

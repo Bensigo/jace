@@ -33,6 +33,7 @@ concurrency:
 
 jobs:
   canary:
+    if: ${{ vars.ENABLE_LEGACY_AGENTRAIL_CANARY == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
