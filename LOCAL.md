@@ -40,3 +40,5 @@ Vercel is the intended later hosting target. Railway files are inherited histori
 The launcher uses `compose.local-data.yml` for data services and host processes for applications.
 
 The verified qwen3:4b cold turn took several minutes and retried once while filling its prompt cache. Later turns were faster. Local model quality and latency depend on your machine and model; this is a connectivity proof, not an acceptance-quality benchmark.
+
+ClickHouse has a 1536M local memory limit by default. Its earlier 768M limit could reject migrations after the server cache grew. Override `CLICKHOUSE_MEMORY_LIMIT` in `.local/env` if your workload needs more headroom; rerunning `pnpm local:up` preserves the data volume.
