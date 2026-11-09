@@ -1,30 +1,14 @@
 {
-  "name": "@useagentrail/cli",
+  "name": "@heyjace/platform",
   "version": "0.1.3",
   "description": "Repo-native harness for AI coding agents with durable context, bounded issue execution, review loops, and verification gates.",
   "license": "Apache-2.0",
-  "bin": {
-    "agentrail": "./agentrail/scripts/agentrail",
-    "useagentrail": "./agentrail/scripts/agentrail"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "files": [
-    "README.md",
-    "agentrail/",
-    "!agentrail/tests/",
-    "!agentrail/docker/",
-    "!agentrail/**/__pycache__/"
-  ],
   "workspaces": [
     "apps/*",
     "!apps/jace",
     "packages/*"
   ],
   "scripts": {
-    "prepublishOnly": "cp README.md README.project.bak && cp npm-README.md README.md",
-    "postpublish": "mv README.project.bak README.md",
     "test": "bash agentrail/scripts/test-install && bash agentrail/scripts/test-public-positioning && bash agentrail/scripts/test-cli-first-docs && bash agentrail/scripts/test-codex-desktop-docs && bash agentrail/scripts/test-worktree-cleanup && bash agentrail/scripts/test-python && bash agentrail/scripts/test-context-index && bash agentrail/scripts/test-context-privacy && bash agentrail/scripts/test-context-embeddings && bash agentrail/scripts/test-context-query && bash agentrail/scripts/test-context-packs && bash agentrail/scripts/test-context-evaluation",
     "typecheck": "pnpm --filter @agentrail/console typecheck",
     "typecheck:python": "bash agentrail/scripts/typecheck-python",
@@ -39,5 +23,6 @@
     "db:seed": "pnpm --filter @agentrail/db-postgres db:seed && pnpm --filter @agentrail/db-clickhouse db:seed",
     "db:seed:pg": "pnpm --filter @agentrail/db-postgres db:seed",
     "db:seed:ch": "pnpm --filter @agentrail/db-clickhouse db:seed"
-  }
+  },
+  "private": true
 }

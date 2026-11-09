@@ -1,3 +1,4 @@
+name: jace
 # AgentRail walking-skeleton — single Docker host (Vultr Ubuntu VM), single
 # tenant / dogfood. Five services: postgres, console, jace, caddy, runner.
 #
