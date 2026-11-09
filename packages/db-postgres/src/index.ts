@@ -51,3 +51,5 @@ export {
   // doc-comment for the text-column coercion it owns.
   getWorkspaceByGithubInstallationId,
 } from "./queries/github-app-token.js";
+
+export * from "./queries/local-login.js";

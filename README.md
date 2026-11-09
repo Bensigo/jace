@@ -4,6 +4,17 @@ Jace owns human-confirmed Acceptance Contracts, bounded Context Packs, exact-PR-
 
 The development workflow is maintained independently at [Bensigo/agentrail](https://github.com/Bensigo/agentrail). This repository runs without an AgentRail server or account.
 
+## Fully local, open-source setup
+
+See [LOCAL.md](LOCAL.md). With Node 24, pnpm 9, Python 3.11+ and Docker Compose:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm local:up
+```
+
+Each product has its own Console, database and artifact storage. Local operator sign-in does not require GitHub OAuth or a hosted product account. `pnpm local:open` signs you in again; `pnpm local:down` stops services while preserving data. Vercel is a future deployment target, not a local requirement.
+
 ## Components
 - `apps/jace`: conversation, channels, coordination and bounded review workers (Node 24).
 - `apps/console`: the trust Console and authenticated API.
@@ -12,19 +23,8 @@ The development workflow is maintained independently at [Bensigo/agentrail](http
 - `agentrail/`: inherited internal context, verification and migration compatibility code. It is not an AgentRail product installation or a dependency on the other repository.
 
 ## Development
-Use Node 24, pnpm 9, Python 3.11 and Docker Compose. Copy the documented environment examples to local untracked files. Use a dedicated database, OAuth/GitHub App credentials and deployment project; do not point this repository at AgentRail's database.
 
-```sh
-pnpm install --frozen-lockfile
-pnpm --filter @agentrail/github-app build
-pnpm --filter @agentrail/db-postgres build
-# Start local data services and apply migrations as described in deploy/README.md.
-pnpm dev
-# In a second terminal:
-cd apps/jace
-npm ci
-npm run dev
-```
+Use `pnpm local:up` for the complete local stack and `pnpm local:status` for its state. The launcher installs repository-local tools, migrates application and durable-workflow tables, builds the coordinator and starts the Console plus workers. Follow [LOCAL.md](LOCAL.md) to install a local model or configure another OpenAI-compatible endpoint. External GitHub/chat integrations are optional and require their own credentials.
 
 Internal `@agentrail/*` names are retained for source compatibility. Dependencies resolve inside this repository. Jace does not publish the AgentRail CLI; its inherited CLI publish/release automation is removed.
 
