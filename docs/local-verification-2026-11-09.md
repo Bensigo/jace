@@ -6,7 +6,7 @@ Jace is a public Apache-2.0 repository with preserved Git history. It runs witho
 - Console owner sign-in required no GitHub OAuth. The local Acceptance Records page rendered independently, and signing into Jace did not overwrite the AgentRail session.
 - The coordinator explicitly listened on 127.0.0.1. Review and Context Pack regeneration workers started; the latter receives only its dedicated credential.
 - A real Eve client request used the local Ollama qwen3:4b model and returned `Jace is running locally.` The cold turn took several minutes and retried once. This proves local connectivity and durable execution, not model quality or full acceptance-task competence.
-- Coordinator: 2,241 unit tests passed and production build passed. Trust MCP: 26 tests passed. Console production build passed before the local-login addition, and final type checking passed afterwards. Shared CLI compatibility focus: 49 passed, 2 skipped. Local login's real PostgreSQL exchange/expiry/concurrency tests passed in the shared implementation.
+- Coordinator: 2,241 unit tests passed and production build passed. Trust MCP: 26 tests passed. The final Console production build and type checking passed after the local-login addition. Shared CLI compatibility focus: 49 passed, 2 skipped; retained canary contract: 12 passed. Local login's real PostgreSQL exchange/expiry/concurrency tests passed in the shared implementation.
 - A fresh-context review found and then cleared the local startup blockers in CLI resolution, occupied-port handling and shutdown.
 
 ![Independent local trust Console](screenshots/local-trust-console.png)
