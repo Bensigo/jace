@@ -31,6 +31,12 @@ The coordinator uses `http://127.0.0.1:11434/v1` with `JACE_MODEL_ID=qwen3:4b` a
 
 The Console starts on port 3001 and the coordinator on port 2001. The review and Context Pack regeneration workers run as separate local processes. The regeneration worker receives only its dedicated credential. External chat platforms and GitHub actions require their own credentials if you enable them. Browser-driven criterion verification also requires the documented isolated browser/preview setup; unavailable proof must stay not_testable/not_proven.
 
+## Build and verify a local release
+
+From a clean checkout of the merged commit, run `JACE_LOCAL_RELEASE=1 pnpm local:up`. The Console serves the production build on the configured local port. Read the compiled commit from `/api/release`.
+
+The AgentRail verifier in `scripts/verify-jace-release.mjs` uses an authenticated Jace fixture workspace with two Acceptance Records linked to different issue numbers. Point `JACE_RELEASE_FIXTURE_FILE` to a private JSON file with the Console `url`, `workspaceId`, `matchRecordId`, `otherRecordId`, numeric `issueNumber`, and the fixture session `cookie` as a single name=value pair. Keep the file outside Git and restrict its permissions. The verifier checks the running build and both list states using the session only on the pinned Console URL.
+
 ## Troubleshooting
 
 Use `pnpm local:status`. Application logs are in `.local/*.log`; data-service logs are available with `docker compose --env-file .local/env -f compose.local-data.yml logs <service>`. If a port is occupied, change its value in `.local/env`; do not stop another project. A failed migration prevents the Console from starting. Do not delete volumes to hide the failure.

@@ -56,6 +56,7 @@ if (!existsSync(".local/env")) {
 await chmod(".local/env", 0o600);
 const settings = parseEnv(await readFile(".local/env", "utf8"));
 const base = `http://127.0.0.1:${settings.CONSOLE_PORT}`;
+const release = isJace && process.env.JACE_LOCAL_RELEASE === "1";
 const coordinatorPort = settings.COORDINATOR_PORT || "2001";
 const database = `postgres://agentrail:${settings.POSTGRES_PASSWORD}@127.0.0.1:${settings.PG_PORT}/agentrail`;
 const runtime = {
@@ -317,11 +318,16 @@ if (action === "up") {
     ["--filter", "@agentrail/console", "exec", "fumadocs-mdx"],
     runtime,
   );
+  if (release) {
+    const status = execFileSync("git", ["status", "--porcelain"], { encoding: "utf8" });
+    if (status.trim()) throw new Error("Build the local release from a clean checkout.");
+    await command("pnpm", ["--filter", "@agentrail/console", "build"], runtime);
+  }
   const consoleChild = await startApp(
     "console",
     [
       resolve(root, "apps/console/node_modules/next/dist/bin/next"),
-      "dev",
+      release ? "start" : "dev",
       "--hostname",
       "127.0.0.1",
       "--port",

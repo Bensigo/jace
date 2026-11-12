@@ -62,10 +62,10 @@ const summary = {
   outcome: { kind: "not_recorded" as const },
 };
 
-async function render(repo?: string | string[]) {
+async function render(repo?: string | string[], issue?: string | string[]) {
   return ChangesPage({
     params: Promise.resolve({ workspaceId }),
-    searchParams: Promise.resolve(repo === undefined ? {} : { repo }),
+    searchParams: Promise.resolve({ repo, issue }),
   });
 }
 
@@ -115,6 +115,28 @@ describe("ChangesPage", () => {
 
     await expect(render()).rejects.toThrow("NEXT_NOT_FOUND");
     expect(readAcceptanceRecordSummaries).not.toHaveBeenCalled();
+  });
+
+  it("composes the exact issue number with the repository filter", async () => {
+    await render("ada/widgets", " 41 ");
+    expect(readAcceptanceRecordSummaries).toHaveBeenCalledExactlyOnceWith({
+      workspaceId, repo: "ada/widgets", issueNumber: 41,
+    });
+  });
+
+  it.each(["0", "-1", "4.1", "2147483648", ["41", "42"]].map(value => [value]))(
+    "rejects malformed or repeated issue values before reading records",
+    async (issue) => {
+      const rendered = await render(undefined, issue);
+      expect(readAcceptanceRecordSummaries).not.toHaveBeenCalled();
+      expect(findByType(rendered, EmptyState)[0]?.props?.title).toBe("Invalid issue filter");
+    },
+  );
+
+  it("describes an empty issue match", async () => {
+    vi.mocked(readAcceptanceRecordSummaries).mockResolvedValue({ kind: "records", records: [] } as never);
+    const rendered = await render("ada/widgets", "42");
+    expect(findByType(rendered, EmptyState)[0]?.props?.description).toBe("No records for issue #42 in ada/widgets.");
   });
 
   it("keeps an honest empty state when the server projection is empty", async () => {

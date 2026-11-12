@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { execFileSync } from "node:child_process";
 import { createMDX } from "fumadocs-mdx/next";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
@@ -6,7 +7,21 @@ import { dirname, join } from "path";
 // ESM-safe __dirname (next.config.ts runs under "type": "module").
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+function buildCommit(): string {
+  const hostedCommit = process.env.VERCEL_GIT_COMMIT_SHA;
+  if (hostedCommit && /^[a-f0-9]{40}$/.test(hostedCommit)) return hostedCommit;
+  try {
+    const options = { cwd: __dirname, encoding: "utf8" as const, timeout: 5000 };
+    const commit = execFileSync("git", ["rev-parse", "HEAD"], options).trim();
+    const dirty = execFileSync("git", ["status", "--porcelain"], options).trim();
+    return !dirty && /^[a-f0-9]{40}$/.test(commit) ? commit : "";
+  } catch {
+    return "";
+  }
+}
+
 const nextConfig: NextConfig = {
+  env: { JACE_BUILD_COMMIT_SHA: buildCommit() },
   // Standalone output produces a minimal, self-contained server bundle
   // (.next/standalone/apps/console/server.js) for the production Docker image
   // (see apps/console/Dockerfile) — copies only the traced production deps

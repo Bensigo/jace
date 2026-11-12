@@ -2066,6 +2066,7 @@ export type ListChangeRecordsInput = {
 export type ReadAcceptanceRecordSummariesInput = {
   workspaceId: string;
   repo?: string | null;
+  issueNumber?: number;
   limit?: number;
 };
 
@@ -18716,21 +18717,24 @@ type AcceptanceRecordSummaryStoredMerge = {
 
 function parseReadAcceptanceRecordSummariesInput(
   input: unknown,
-): { workspaceId: string; repo: string | null; limit: number } {
+): { workspaceId: string; repo: string | null; issueNumber: number | null; limit: number } {
   if (!isRecord(input)
-    || !Object.keys(input).every((key) => key === "workspaceId" || key === "repo" || key === "limit")
+    || !Object.keys(input).every((key) => key === "workspaceId" || key === "repo" || key === "issueNumber" || key === "limit")
     || !hasOwn(input, "workspaceId") || !isUuid(input["workspaceId"])
     || (hasOwn(input, "repo") && input["repo"] !== null
       && (typeof input["repo"] !== "string" || !safeRepo(input["repo"])))
+    || (hasOwn(input, "issueNumber") && (!Number.isInteger(input["issueNumber"])
+      || (input["issueNumber"] as number) < 1 || (input["issueNumber"] as number) > 2147483647))
     || (hasOwn(input, "limit")
       && (!Number.isSafeInteger(input["limit"])
         || (input["limit"] as number) < 1
         || (input["limit"] as number) > ACCEPTANCE_RECORD_SUMMARY_MAX_LIMIT))) {
-    throw new Error("Acceptance Record summaries require only workspace, optional repository, and bounded limit");
+    throw new Error("Acceptance Record summaries require only workspace, optional repository and issue number, and bounded limit");
   }
   return {
     workspaceId: input["workspaceId"],
     repo: (input["repo"] as string | null | undefined) ?? null,
+    issueNumber: (input["issueNumber"] as number | undefined) ?? null,
     limit: (input["limit"] as number | undefined) ?? ACCEPTANCE_RECORD_SUMMARY_DEFAULT_LIMIT,
   };
 }
@@ -19302,6 +19306,7 @@ async function readAcceptanceRecordSummariesInTransaction(
 ): Promise<ReadAcceptanceRecordSummariesResult> {
     const candidatePredicates = [eq(changeRecords.workspaceId, parsed.workspaceId)];
     if (parsed.repo != null) candidatePredicates.push(eq(changeRecords.repo, parsed.repo));
+    if (parsed.issueNumber != null) candidatePredicates.push(eq(changeRecords.issueNumber, parsed.issueNumber));
     if (parsed.recordId != null) candidatePredicates.push(eq(changeRecords.id, parsed.recordId));
     const candidates = await tx.select().from(changeRecords).where(and(...candidatePredicates))
       .orderBy(desc(changeRecords.updatedAt), desc(changeRecords.createdAt), desc(changeRecords.id))
@@ -19335,9 +19340,8 @@ async function readAcceptanceRecordSummariesInTransaction(
 
     const recordIds = candidates.map((record) => record.id);
     const records = await tx.select().from(changeRecords).where(and(
-      eq(changeRecords.workspaceId, parsed.workspaceId),
+      ...candidatePredicates,
       inArray(changeRecords.id, recordIds),
-      ...(parsed.repo == null ? [] : [eq(changeRecords.repo, parsed.repo)]),
     )).orderBy(desc(changeRecords.updatedAt), desc(changeRecords.createdAt), desc(changeRecords.id));
     if (records.length === 0) return { kind: "records", records: [] };
     const stableRecordIds = records.map((record) => record.id);
@@ -20200,6 +20204,7 @@ export async function readAcceptanceRecordDetail(
     const summaryResult = await readAcceptanceRecordSummariesInTransaction(tx, {
       workspaceId: parsed.workspaceId,
       repo: null,
+      issueNumber: null,
       limit: 1,
       recordId: parsed.recordId,
     });
