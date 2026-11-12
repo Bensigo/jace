@@ -22,5 +22,24 @@
     "embedding": {
       "mode": "disabled"
     }
+  },
+  "workflow": {
+    "checks": {
+      "acceptance-record-issue-filter": [
+        "pnpm",
+        "--filter",
+        "@agentrail/console",
+        "exec",
+        "vitest",
+        "run",
+        "app/(dashboard)/dashboard/[workspaceId]/changes/page.test.tsx"
+      ]
+    },
+    "release": {
+      "verify": [
+        "node",
+        "scripts/verify-jace-release.mjs"
+      ]
+    }
   }
 }
