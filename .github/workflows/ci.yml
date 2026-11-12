@@ -193,7 +193,8 @@ jobs:
   r11-browser:
     name: R11.2 authenticated Record detail
     needs: node
-    runs-on: ubuntu-latest
+    # Playwright 1.57 provides Chromium on Ubuntu 24.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       DATABASE_URL: postgres://agentrail:agentrail@127.0.0.1:5434/agentrail
